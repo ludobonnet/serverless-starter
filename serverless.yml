@@ -1,28 +1,114 @@
 service: serverless-starter
 
+frameworkVersion: ">=1.1.0 <2.0.0"
+
 provider:
   name: aws
   runtime: nodejs4.3
+  region: eu-west-1 # Overwrite the default region used. Default is us-east-1
+  stage: ${opt:stage, self:custom.defaultStage}
+  profile: ${self:custom.profiles.${self:provider.stage}}
+  memorySize: 512 # Overwrite the default memory size. Default is 1024
+  iamRoleStatements:
+    ### DynamoDB
+    # - Effect: Allow
+    #   Action:
+    #     - dynamodb:DescribeTable
+    #     - dynamodb:Query
+    #     - dynamodb:Scan
+    #     - dynamodb:GetItem
+    #     - dynamodb:PutItem
+    #     - dynamodb:UpdateItem
+    #     - dynamodb:DeleteItem
+    #   Resource: "arn:aws:dynamodb:${self:provider.region}}:*:*"
+    ### Lambda
+    # - Effect: Allow
+    #   Action:
+    #     - lambda:InvokeFunction
+    #   Resource: "arn:aws:lambda:${self:provider.region}}:*:*"
+  # apiKeys:
+  #   - YourAPIkey
+
+package:
+  exclude:
+    - .git/**
+    - .gitignore
+    - .jshintrc
+    - LICENCE.md
+    - README.md
 
 functions:
-  single:
-    handler: single.handler
+  create:
+    handler: endpointA/create.handler
     events:
       - http:
-          path: single
-          method: get
-      - http:
-          path: single
+          # path: endpointA
           method: post
-  multiCreate:
-    handler: multiCreate.handler
+          cors: true
+          # private: true
+
+  list:
+    handler: endpointA/list.handler
     events:
       - http:
-          path: multi/create
+          # path: endpointA
           method: get
-  multiShow:
-    handler: multiShow.handler
+          cors: true
+          # private: true
+
+  get:
+    handler: endpointA/get.handler
     events:
       - http:
-          path: multi/show/{id}
+          # path: endpointA/{id}
+          path: /{id}
           method: get
+          cors: true
+
+  update:
+    handler: endpointA/update.handler
+    events:
+      - http:
+          # path: endpointA/{id}
+          path: /{id}
+          method: put
+          cors: true
+          # private: true
+
+  delete:
+    handler: endpointA/delete.handler
+    events:
+      - http:
+          # path: endpointA/{id}
+          path: /{id}
+          method: delete
+          cors: true
+          # private: true
+
+# resources:
+#   Resources:
+#     starterDynamoDbTable:
+#       Type: 'AWS::DynamoDB::Table'
+#       DeletionPolicy: Retain
+#       Properties:
+#         TableName: 'starterTable_'.${self:provider.stage}
+#         AttributeDefinitions:
+#           -
+#             AttributeName: uuid
+#             AttributeType: S
+#         KeySchema:
+#           -
+#             AttributeName: uuid
+#             KeyType: HASH
+#         ProvisionedThroughput:
+#           ReadCapacityUnits: 1
+#           WriteCapacityUnits: 1
+
+custom:
+  defaultStage: dev
+  profiles:
+    dev: devProfile
+    prod: prodProfile
+
+plugins:
+  - serverless-offline

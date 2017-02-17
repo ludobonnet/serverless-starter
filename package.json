@@ -9,6 +9,8 @@
     "type": "git",
     "url": "https://github.com/serverless/serverless-starter.git"
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "serverless-offline": "^3.8.3"
   }
 }
